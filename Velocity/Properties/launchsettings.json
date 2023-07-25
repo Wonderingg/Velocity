@@ -1,0 +1,10 @@
+﻿{
+    "profiles": {
+      "Velocity (Unpackaged)": {
+        "commandName": "Project"
+      },
+      "Velocity (Package)": {
+        "commandName": "MsixPackage"
+      }
+    }
+}
