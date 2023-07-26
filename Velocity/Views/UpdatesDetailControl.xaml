@@ -17,7 +17,7 @@
                 Text="{x:Bind WindowsUpdate.Title, Mode=OneWay}"
                 Style="{ThemeResource TitleTextBlockStyle}" />
             <TextBlock Text="{x:Bind WindowsUpdate.Description, Mode=OneWay}" Style="{StaticResource DetailBodyBaseMediumStyle}" />
-            <CheckBox IsChecked="{x:Bind WindowsUpdate.IsInstalled, Mode=TwoWay}" Content="Installed"/>
+            <Button Command="{Binding DownloadAndInstallCommand}" CommandParameter="{Binding WindowsUpdate}">Download and Install</Button>
         </StackPanel>
     </ScrollViewer>
 </UserControl>

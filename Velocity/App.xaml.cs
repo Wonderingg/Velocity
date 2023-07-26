@@ -4,7 +4,8 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.UI.Xaml;
-
+using NLog;
+using NLog.Extensions.Logging;
 using Velocity.Activation;
 using Velocity.Contracts.Services;
 using Velocity.Core.Contracts.Services;
@@ -25,7 +26,7 @@ public partial class App : Application
     // https://docs.microsoft.com/dotnet/core/extensions/dependency-injection
     // https://docs.microsoft.com/dotnet/core/extensions/configuration
     // https://docs.microsoft.com/dotnet/core/extensions/logging
-    public IHost Host
+    private IHost Host
     {
         get;
     }
@@ -46,12 +47,6 @@ public partial class App : Application
         get;
     } = new MainWindow();
 
-    public static ILogService LogService
-    {
-        get;
-        private set;
-    }
-
     public static UIElement? AppTitlebar
     {
         get;
@@ -68,8 +63,8 @@ public partial class App : Application
         ConfigureLogging(logging =>
         {
             logging.ClearProviders();
-            logging.AddConsole();
-            logging.AddDebug();
+            logging.AddNLog();
+
         }).
         ConfigureServices((context, services) =>
         {
@@ -87,7 +82,6 @@ public partial class App : Application
             services.AddSingleton<INavigationService, NavigationService>();
 
             // Core Services
-            services.AddSingleton<ILogService, LogService>();
             services.AddSingleton<IWindowsUpdateService, WindowsUpdateService>();
             services.AddSingleton<IFileService, FileService>();
 
@@ -107,18 +101,13 @@ public partial class App : Application
 
             // Configuration
             services.Configure<LocalSettingsOptions>(context.Configuration.GetSection(nameof(LocalSettingsOptions)));
-        }).
-        Build();
-        LogService = Host.Services.GetRequiredService<ILogService>();
+        })
+        .Build();
         UnhandledException += App_UnhandledException;
     }
 
     private void App_UnhandledException(object sender, Microsoft.UI.Xaml.UnhandledExceptionEventArgs e)
     {
-        var logger = GetService<ILogService>();
-        logger.LogError(e.Exception, e.Message);
-        e.Handled = true;
-
     }
 
     protected async override void OnLaunched(LaunchActivatedEventArgs args)

@@ -10,6 +10,9 @@ using Velocity.Contracts.Services;
 using Velocity.Helpers;
 
 using Windows.ApplicationModel;
+using NLog;
+using NLog.Targets;
+using Windows.Storage.Pickers;
 
 namespace Velocity.ViewModels;
 
@@ -27,6 +30,8 @@ public partial class SettingsViewModel : ObservableRecipient
     {
         get;
     }
+
+
 
     public SettingsViewModel(IThemeSelectorService themeSelectorService)
     {

@@ -8,6 +8,8 @@ using Velocity.Models;
 
 using Windows.ApplicationModel;
 using Windows.Storage;
+using NLog;
+using NLog.Targets;
 
 namespace Velocity.Services;
 
@@ -15,12 +17,14 @@ public class LocalSettingsService : ILocalSettingsService
 {
     private const string DefaultApplicationDataFolder = "Velocity/ApplicationData";
     private const string DefaultLocalSettingsFile = "LocalSettings.json";
+    private const string DefaultLogFile = "VelocityLogs.json";
 
     private readonly IFileService _fileService;
     private readonly LocalSettingsOptions _options;
 
     private readonly string _localApplicationData = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
     private readonly string _applicationDataFolder;
+    private readonly string _applicationLogsFolder;
     private readonly string _localsettingsFile;
 
     private IDictionary<string, object> _settings;
@@ -34,8 +38,10 @@ public class LocalSettingsService : ILocalSettingsService
 
         _applicationDataFolder = Path.Combine(_localApplicationData, _options.ApplicationDataFolder ?? DefaultApplicationDataFolder);
         _localsettingsFile = _options.LocalSettingsFile ?? DefaultLocalSettingsFile;
-
+        _applicationLogsFolder = Path.Combine(_applicationDataFolder, DefaultLogFile);
         _settings = new Dictionary<string, object>();
+
+        SetupNLog();
     }
 
     private async Task InitializeAsync()
@@ -84,5 +90,35 @@ public class LocalSettingsService : ILocalSettingsService
 
             await Task.Run(() => _fileService.Save(_applicationDataFolder, _localsettingsFile, _settings));
         }
+    }
+
+    private void SetupNLog()
+    {
+        var config = new NLog.Config.LoggingConfiguration();
+        var jsonLayout = new NLog.Layouts.JsonLayout()
+        {
+            Attributes =
+            {
+                new NLog.Layouts.JsonAttribute("timeStamp", "${longdate}"),
+                new NLog.Layouts.JsonAttribute("level", "${level}"),
+                new NLog.Layouts.JsonAttribute("logger", "${logger}"),
+                new NLog.Layouts.JsonAttribute("message", "${message}"),
+                new NLog.Layouts.JsonAttribute("exception", "${exception:format=toString,StackTrace}")
+            },
+            IncludeEventProperties = true,
+        };
+        var logfile = new FileTarget("logfile")
+        {
+            FileName = _applicationLogsFolder,
+            Layout = jsonLayout
+        };
+
+        config.AddRule(LogLevel.Debug, LogLevel.Fatal, logfile);
+        LogManager.Configuration = config;
+    }
+
+    public Task<string> GetLogFolderAsync()
+    {
+        return Task.FromResult(_applicationLogsFolder);
     }
 }

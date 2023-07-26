@@ -11,6 +11,8 @@ public sealed partial class UpdatesDetailControl : UserControl
         typeof(WindowsUpdate), typeof(UpdatesDetailControl),
         new PropertyMetadata(null, OnWindowsUpdatePropertyChanged));
 
+    public event EventHandler<WindowsUpdate>? DownloadAndInstallClicked;
+
     public WindowsUpdate WindowsUpdate
     {
         get => (WindowsUpdate)GetValue(WindowsUpdateProperty);
@@ -27,5 +29,11 @@ public sealed partial class UpdatesDetailControl : UserControl
         {
             control.ForegroundElement.ChangeView(0, 0, 1);
         }
+    }
+
+
+    private void OnDownloadAndInstallClicked(object sender, RoutedEventArgs e)
+    {
+        DownloadAndInstallClicked?.Invoke(this, WindowsUpdate);
     }
 }

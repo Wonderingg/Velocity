@@ -1,7 +1,7 @@
 ﻿using System.Collections.ObjectModel;
-
+using System.Windows.Input;
 using CommunityToolkit.Mvvm.ComponentModel;
-
+using CommunityToolkit.Mvvm.Input;
 using Velocity.Contracts.ViewModels;
 using Velocity.Core.Contracts.Services;
 using Velocity.Core.Models;
@@ -12,14 +12,26 @@ public partial class UpdatesViewModel : ObservableRecipient, INavigationAware
 {
     private readonly IWindowsUpdateService _windowsUpdateService;
 
-    [ObservableProperty]
-    private WindowsUpdate? _selected;
+    private UpdateDetailViewModel _selected;
 
-    public ObservableCollection<WindowsUpdate> AvailableUpdates
+    public UpdateDetailViewModel Selected
     {
-        get;
-        set;
-    } = new();
+        get
+        {
+            return _selected;
+        }
+        set
+        {
+            if (_selected != value)
+            {
+                _selected = value;
+                OnPropertyChanged(nameof(Selected));
+            }
+        }
+    }
+
+    public ObservableCollection<UpdateDetailViewModel> AvailableUpdateViewModels { get; } = new ObservableCollection<UpdateDetailViewModel>();
+
 
     public UpdatesViewModel(IWindowsUpdateService windowsUpdateService)
     {
@@ -33,22 +45,15 @@ public partial class UpdatesViewModel : ObservableRecipient, INavigationAware
 
     public async Task LoadUpdatesAsync()
     {
-        AvailableUpdates.Clear();
+        AvailableUpdateViewModels.Clear();
 
         var updates = await _windowsUpdateService.GetAvailableUpdatesAsync();
 
         foreach (var update in updates)
         {
-            AvailableUpdates.Add(update);
+            AvailableUpdateViewModels.Add(new UpdateDetailViewModel(_windowsUpdateService) { WindowsUpdate = update });
         }
     }
-
-    public async void DownloadAndInstallUpdate(WindowsUpdate update)
-    {
-        await _windowsUpdateService.DownloadUpdateAsync(update);
-        await _windowsUpdateService.InstallUpdateAsync(update);
-    }
-
 
     public void OnNavigatedFrom()
     {
@@ -56,9 +61,9 @@ public partial class UpdatesViewModel : ObservableRecipient, INavigationAware
 
     public void EnsureItemSelected()
     {
-        if (AvailableUpdates.Any())
+        if (AvailableUpdateViewModels.Any())
         {
-            Selected ??= AvailableUpdates.First();
+            Selected ??= AvailableUpdateViewModels.First();
         }
     }
 }

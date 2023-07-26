@@ -20,14 +20,4 @@ public sealed partial class DebugPage : Page
         InitializeComponent();
     }
 
-
-    private void ClearLog_Click(object sender, RoutedEventArgs e)
-    {
-        ViewModel.ClearLog();
-    }
-
-    private void OpenLog_Click(object sender, RoutedEventArgs e)
-    {
-        ViewModel.OpenLog();
-    }
 }

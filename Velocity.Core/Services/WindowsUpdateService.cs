@@ -1,4 +1,5 @@
-﻿using Velocity.Core.Contracts.Services;
+﻿using System.Diagnostics;
+using Velocity.Core.Contracts.Services;
 using Velocity.Core.Models;
 
 namespace Velocity.Core.Services;
@@ -7,6 +8,7 @@ public class WindowsUpdateService : IWindowsUpdateService
     private readonly dynamic _updateSession = null;
     private readonly dynamic _updateSearcher = null;
     private dynamic _searchResult = null;
+    private static readonly NLog.Logger Logger = NLog.LogManager.GetCurrentClassLogger();
 
     public WindowsUpdateService()
     {
@@ -47,14 +49,13 @@ public class WindowsUpdateService : IWindowsUpdateService
                         IsInstalled = update.IsInstalled
                     });
                 }
-
             });
+            Logger.Info("Successfully retrieved available Windows updates.");
             return updates;
         }
-        catch (Exception e)
+        catch (Exception ex)
         {
-            var logService = new LogService();
-            logService.LogError(e, e.Message);
+            Logger.Error(ex, "Failed to get available Windows updates.");
             throw;
         }
 
