@@ -25,18 +25,12 @@ public partial class DebugViewModel : ObservableRecipient, INavigationAware
     public DebugViewModel(ILogService logService)
     {
         _logService = logService;
-        Logs.CollectionChanged += Logs_CollectionChanged!;
     }
 
     public Task OnNavigatedTo(object parameter)
     {
         LoadLogs().ConfigureAwait(false);
         return Task.CompletedTask;
-    }
-
-    private async void Logs_CollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
-    {
-        await RefreshLogs();
     }
 
     public void OnNavigatedFrom()
@@ -109,5 +103,6 @@ public partial class DebugViewModel : ObservableRecipient, INavigationAware
     public async Task GenerateSampleError()
     {
         await LogExtension.Log(Logger, LogLevel.Info, $"Sample Error!", LogEvent.EventID.DebugInformation);
+        await RefreshLogs();
     }
 }

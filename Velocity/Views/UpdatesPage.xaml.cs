@@ -17,7 +17,6 @@ public sealed partial class UpdatesPage : Page
     {
         ViewModel = App.GetService<UpdatesViewModel>();
         InitializeComponent();
-        ViewModel.LoadUpdatesAsync().ConfigureAwait(false);
     }
 
     private void OnViewStateChanged(object sender, ListDetailsViewState e)
