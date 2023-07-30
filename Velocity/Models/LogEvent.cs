@@ -15,7 +15,7 @@ public class LogEvent
     }
 
     [JsonProperty("eventId")]
-    public required string EventId
+    public required EventID EventId
     {
         get; set;
     }
@@ -42,5 +42,38 @@ public class LogEvent
     public required string Exception
     {
         get; set;
+    }
+
+    public enum EventID
+    {
+        // General events
+        Startup = 1,
+        Shutdown = 2,
+        OperationStarted = 3,
+        OperationCompleted = 4,
+
+        // WindowsUpdateService specific events
+        AvailableUpdatesRetrieved = 10,
+        AvailableUpdatesFailedToRetrieve = 11,
+        UpdateDownloadStarted = 12,
+        UpdateDownloadCompleted = 13,
+        UpdateDownloadFailed = 14,
+        UpdateInstallStarted = 15,
+        UpdateInstallCompleted = 16,
+        UpdateInstallFailed = 17,
+
+        // Other service specific events
+        ServiceStarted = 20,
+        ServiceCompleted = 21,
+        ServiceFailed = 22,
+
+        // Error events
+        GeneralError = 30,
+        DatabaseError = 31,
+        NetworkError = 32,
+        IOError = 33,
+
+        // Debug events
+        DebugInformation = 50
     }
 }

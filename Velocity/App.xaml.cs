@@ -80,6 +80,7 @@ public partial class App : Application
             services.AddSingleton<IActivationService, ActivationService>();
             services.AddSingleton<IPageService, PageService>();
             services.AddSingleton<INavigationService, NavigationService>();
+            services.AddSingleton<ILogService, LogService>();
 
             // Core Services
             services.AddSingleton<IWindowsUpdateService, WindowsUpdateService>();
@@ -109,8 +110,6 @@ public partial class App : Application
 
     private void App_UnhandledException(object sender, Microsoft.UI.Xaml.UnhandledExceptionEventArgs e)
     {
-        var logger = LogManager.GetCurrentClassLogger();
-        logger.Error(e.Exception, "Unhandled exception");
         e.Handled = true;
     }
 

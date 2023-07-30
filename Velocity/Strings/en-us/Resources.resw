@@ -127,7 +127,7 @@
     <value>Tweaks</value>
   </data>
   <data name="Updates_NoSelection.Text" xml:space="preserve">
-    <value>Select an item from the list.</value>
+    <value>No updates found.</value>
   </data>
   <data name="Shell_Updates.Content" xml:space="preserve">
     <value>Updates</value>
@@ -153,16 +153,19 @@
   <data name="Settings_AboutDescription.Text" xml:space="preserve">
     <value>Your Ultimate Windows Companion - Keeping your system secure, updated, and optimized for performance. Velocity streamlines your Windows experience by ensuring it stays up-to-date with the latest security patches, applying performance optimizations, and conducting comprehensive security checks. With Velocity, you can rest easy knowing your system is running at its best. </value>
   </data>
-  <data name="SettingsPage_PrivacyTermsLink.Content" xml:space="preserve">
+  <data name="SettingsPage_GitHubLink.Content" xml:space="preserve">
     <value>GitHub</value>
   </data>
-  <data name="SettingsPage_PrivacyTermsLink.NavigateUri" xml:space="preserve">
-    <value>https://YourPrivacyUrlGoesHere/</value>
+  <data name="SettingsPage_GitHubLink.NavigateUri" xml:space="preserve">
+    <value>https://github.com/luke-beep/Velocity</value>
   </data>
   <data name="Shell_Home.Content" xml:space="preserve">
     <value>Home</value>
   </data>
   <data name="Shell_Debug.Content" xml:space="preserve">
     <value>Debug</value>
+  </data>
+  <data name="SettingsPage_OpenSettingsFolderCommand.Content" xml:space="preserve">
+    <value>Open Settings Folder</value>
   </data>
 </root>

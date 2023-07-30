@@ -13,23 +13,24 @@
             <RowDefinition Height="*" />
         </Grid.RowDefinitions>
 
-        <StackPanel Orientation="Horizontal" Grid.Row="0">
+        <StackPanel Orientation="Horizontal" Grid.Row="0" Margin="0, 0, 0, 5">
             <Button Content="Generate Error" Click="GenerateSampleError" Margin="0,0,5,0"/>
             <Button Content="Refresh Logs" Click="RefreshLogs" Margin="0,0,5,0"/>
-            <Button Content="Clear Logs" Click="ClearLogs" Margin="0,0,5,0"/>
-            <Button Content="Fix Logs" Click="FixLogs" />
+            <Button Content="Fix Logs" Click="FixLogs" Margin="0,0,5,0"/>
+            <Button Content="Open Logs" Click="OpenLogFolder"/>
         </StackPanel>
 
         <controls:DataGrid
             Grid.Row="1"
             AutoGenerateColumns="False"
             GridLinesVisibility="Horizontal"
-            ItemsSource="{x:Bind ViewModel.Logs, Mode=OneWay}">
+            ItemsSource="{x:Bind ViewModel.Logs, Mode=OneWay}"
+            Margin="0,0,0,50">
             <controls:DataGrid.Resources>
                 <SolidColorBrush x:Key="DataGridColumnHeaderBackgroundColor" Color="Transparent" />
             </controls:DataGrid.Resources>
             <controls:DataGrid.Columns>
-                <controls:DataGridTextColumn Binding="{Binding TimeStamp}" Header="TimeStamp" IsReadOnly="True"/>
+                <controls:DataGridTextColumn Binding="{Binding TimeStamp}" x:Uid="DebugPage_TimeStamp" Header="TimeStamp" IsReadOnly="True"/>
                 <controls:DataGridTextColumn Binding="{Binding EventId}" Header="EventId" IsReadOnly="True"/>
                 <controls:DataGridTextColumn Binding="{Binding Logger}" Header="Logger" IsReadOnly="True"/>
                 <controls:DataGridTextColumn Binding="{Binding Level}" Header="Level" IsReadOnly="True"/>

@@ -40,7 +40,7 @@ public partial class UpdatesViewModel : ObservableRecipient, INavigationAware
 
     public async Task OnNavigatedTo(object parameter)
     {
-        await LoadUpdatesAsync();
+
     }
 
     public async Task LoadUpdatesAsync()

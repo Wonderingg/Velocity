@@ -19,6 +19,7 @@ namespace Velocity.ViewModels;
 public partial class SettingsViewModel : ObservableRecipient
 {
     private readonly IThemeSelectorService _themeSelectorService;
+    private readonly ILocalSettingsService _localSettingsService;
 
     [ObservableProperty]
     private ElementTheme _elementTheme;
@@ -26,18 +27,23 @@ public partial class SettingsViewModel : ObservableRecipient
     [ObservableProperty]
     private string _versionDescription;
 
+
     public ICommand SwitchThemeCommand
     {
         get;
     }
 
+    public ICommand OpenSettingsFolderCommand
+    {
+        get;
+    }
 
-
-    public SettingsViewModel(IThemeSelectorService themeSelectorService)
+    public SettingsViewModel(IThemeSelectorService themeSelectorService, ILocalSettingsService localSettingsService)
     {
         _themeSelectorService = themeSelectorService;
         _elementTheme = _themeSelectorService.Theme;
         _versionDescription = GetVersionDescription();
+        _localSettingsService = localSettingsService;
 
         SwitchThemeCommand = new RelayCommand<ElementTheme>(
             async (param) =>
@@ -48,6 +54,13 @@ public partial class SettingsViewModel : ObservableRecipient
                     await _themeSelectorService.SetThemeAsync(param);
                 }
             });
+
+        OpenSettingsFolderCommand = new RelayCommand(OpenSettingsFolder);
+    }
+
+    private async void OpenSettingsFolder()
+    {
+        await _localSettingsService.OpenSettingsFolder();
     }
 
     private static string GetVersionDescription()

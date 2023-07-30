@@ -1,6 +1,12 @@
 ﻿using System.Diagnostics;
+using NLog;
 using Velocity.Core.Contracts.Services;
 using Velocity.Core.Models;
+using Velocity;
+using Velocity.Core.Helpers;
+using Velocity.Models;
+using NLog.Fluent;
+using Velocity.Helpers;
 
 namespace Velocity.Core.Services;
 public class WindowsUpdateService : IWindowsUpdateService
@@ -8,7 +14,7 @@ public class WindowsUpdateService : IWindowsUpdateService
     private readonly dynamic _updateSession = null;
     private readonly dynamic _updateSearcher = null;
     private dynamic _searchResult = null;
-    private static readonly NLog.Logger Logger = NLog.LogManager.GetCurrentClassLogger();
+    private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
 
     public WindowsUpdateService()
     {
@@ -29,7 +35,6 @@ public class WindowsUpdateService : IWindowsUpdateService
         try
         {
             var updates = new List<WindowsUpdate>();
-
             await Task.Run(() =>
             {
                 _searchResult = _updateSearcher.Search("IsInstalled=0");
@@ -50,12 +55,12 @@ public class WindowsUpdateService : IWindowsUpdateService
                     });
                 }
             });
-            Logger.Info("Successfully retrieved available Windows updates.");
+            await LogExtension.Log(Logger, LogLevel.Info, $"Successfully retrieved available Windows updates.", LogEvent.EventID.AvailableUpdatesRetrieved);
             return updates;
         }
         catch (Exception ex)
         {
-            Logger.Error(ex, "Failed to get available Windows updates.");
+            await LogExtension.Log(Logger, LogLevel.Error, ex.ToString(), LogEvent.EventID.AvailableUpdatesFailedToRetrieve);
             throw;
         }
 
@@ -65,6 +70,8 @@ public class WindowsUpdateService : IWindowsUpdateService
     {
         await Task.Run(() =>
         {
+            LogExtension.Log(Logger, LogLevel.Info, $"Downloading {update.Title}", LogEvent.EventID.UpdateDownloadStarted);
+
 #pragma warning disable CA1416
             dynamic updatesToDownload = Activator.CreateInstance(Type.GetTypeFromProgID("Microsoft.Update.UpdateColl") ?? throw new InvalidOperationException());
 #pragma warning restore CA1416
@@ -77,8 +84,9 @@ public class WindowsUpdateService : IWindowsUpdateService
 
                 if (downloadResult.ResultCode != 2)
                 {
-                    throw new Exception($"Download failed with result code: {downloadResult.ResultCode}");
+                    LogExtension.Log(Logger, LogLevel.Error, $"Download failed with result code: {downloadResult.ResultCode}", LogEvent.EventID.UpdateDownloadFailed);
                 }
+                LogExtension.Log(Logger, LogLevel.Info, $"Successfully downloaded {update.Title} with result code: {downloadResult.ResultCode}", LogEvent.EventID.UpdateDownloadCompleted);
             }
         });
     }
@@ -87,6 +95,7 @@ public class WindowsUpdateService : IWindowsUpdateService
     {
         await Task.Run(() =>
         {
+            LogExtension.Log(Logger, LogLevel.Info, $"Installing {update.Title}", LogEvent.EventID.UpdateInstallStarted);
 #pragma warning disable CA1416
             dynamic updatesToInstall = Activator.CreateInstance(Type.GetTypeFromProgID("Microsoft.Update.UpdateColl") ?? throw new InvalidOperationException());
 #pragma warning restore CA1416
@@ -99,8 +108,10 @@ public class WindowsUpdateService : IWindowsUpdateService
 
                 if (installResult.ResultCode != 2)
                 {
-                    throw new Exception($"Installation failed with result code: {installResult.ResultCode}");
+                    LogExtension.Log(Logger, LogLevel.Error, $"Install failed with result code: {installResult.ResultCode}", LogEvent.EventID.UpdateInstallFailed);
                 }
+                LogExtension.Log(Logger, LogLevel.Info, $"Successfully installed {update.Title} with result code: {installResult.ResultCode}", LogEvent.EventID.UpdateInstallCompleted);
+
             }
         });
     }

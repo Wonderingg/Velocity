@@ -39,4 +39,8 @@ public sealed partial class DebugPage : Page
         ViewModel.FixLogs().ConfigureAwait(false);
     }
 
+    private void OpenLogFolder(object sender, RoutedEventArgs e)
+    {
+        ViewModel.OpenLogFolder();
+    }
 }
