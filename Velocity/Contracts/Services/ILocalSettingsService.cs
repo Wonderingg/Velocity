@@ -9,4 +9,6 @@ public interface ILocalSettingsService
     Task SaveSettingAsync<T>(string key, T value);
 
     Task<string> GetLogFolderAsync();
+
+    void SetupNLog();
 }

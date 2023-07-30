@@ -20,4 +20,23 @@ public sealed partial class DebugPage : Page
         InitializeComponent();
     }
 
+    private void GenerateSampleError(object sender, RoutedEventArgs e)
+    {
+        ViewModel.GenerateSampleError().ConfigureAwait(false);
+    }
+    private void RefreshLogs(object sender, RoutedEventArgs e)
+    {
+        ViewModel.RefreshLogs().ConfigureAwait(false);
+    }
+
+    private void ClearLogs(object sender, RoutedEventArgs e)
+    {
+        ViewModel.ClearLogs().ConfigureAwait(false);
+    }
+
+    private void FixLogs(object sender, RoutedEventArgs e)
+    {
+        ViewModel.FixLogs().ConfigureAwait(false);
+    }
+
 }

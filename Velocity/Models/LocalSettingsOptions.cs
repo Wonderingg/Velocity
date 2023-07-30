@@ -13,4 +13,10 @@ public class LocalSettingsOptions
         get;
         set;
     }
+
+    public string? LogFile
+    {
+        get;
+        set;
+    }
 }

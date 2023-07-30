@@ -17,9 +17,10 @@ public class UpdateDetailViewModel : ObservableRecipient
     {
         get; set;
     }  
-    public UpdateDetailViewModel(IWindowsUpdateService windowsUpdateService)
+    public UpdateDetailViewModel(IWindowsUpdateService windowsUpdateService, WindowsUpdate windowsUpdate)
     {
         _windowsUpdateService = windowsUpdateService;
+        WindowsUpdate = windowsUpdate;
         DownloadAndInstallCommand = new RelayCommand<WindowsUpdate>(DownloadAndInstallUpdateAsync);
     }
 

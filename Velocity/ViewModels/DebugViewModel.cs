@@ -8,6 +8,7 @@ using Velocity.Contracts.ViewModels;
 using Velocity.Core.Contracts.Services;
 using Velocity.Core.Models;
 using Velocity.Core.Services;
+using Velocity.Helpers;
 using Velocity.Models;
 using Velocity.Services;
 
@@ -21,15 +22,58 @@ public partial class DebugViewModel : ObservableRecipient, INavigationAware
     } = new();
 
     string _fileContents;
-
+    private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
     private readonly ILocalSettingsService _localSettingsService;
-
     public DebugViewModel(ILocalSettingsService localSettingsService)
     {
         _localSettingsService = localSettingsService;
     }
 
-    public async Task OnNavigatedTo(object parameter)
+    public Task OnNavigatedTo(object parameter)
+    {
+        LoadLogs();
+        return Task.CompletedTask;
+    }
+
+
+
+    public void OnNavigatedFrom()
+    {
+        Logs.Clear();
+    }
+
+    private async Task<List<LogEvent>?> ParseLogFileAsync(string filePath)
+    {
+        var logs = new List<LogEvent>();
+        await using var fileStream = new FileStream(filePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite);
+        using var streamReader = new StreamReader(fileStream);
+        string? line;
+        while ((line = await streamReader.ReadLineAsync()) != null)
+        {
+            try
+            {
+                var log = JsonConvert.DeserializeObject<LogEvent>(line);
+                if (log != null)
+                {
+                    logs.Add(log);
+                }
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"Failed to deserialize line in log file. Exception: {ex.Message}");
+            }
+        }
+
+        if (!logs.Any())
+        {
+            Debug.WriteLine("No logs found in log file");
+            return null;
+        }
+
+        return logs;
+    }
+
+    private async Task LoadLogs()
     {
         var filePath = await _localSettingsService.GetLogFolderAsync();
         if (string.IsNullOrEmpty(filePath))
@@ -52,38 +96,35 @@ public partial class DebugViewModel : ObservableRecipient, INavigationAware
         }
     }
 
-    public void OnNavigatedFrom()
+    public Task FixLogs()
     {
-        Logs.Clear();
+        _localSettingsService.SetupNLog();
+        return Task.CompletedTask;
     }
 
-    private async Task<List<LogEvent>?> ParseLogFileAsync(string filePath)
+    public async Task RefreshLogs()
     {
-        await using var fileStream = new FileStream(filePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite);
-        using var streamReader = new StreamReader(fileStream);
-        _fileContents = await streamReader.ReadToEndAsync().ConfigureAwait(false);
+        await ClearLogs();
+        await LoadLogs();
+    }
 
-        if (string.IsNullOrEmpty(_fileContents))
-        {
-            Debug.WriteLine("Log file contents are null or empty");
-            return null;
-        }
+    public Task ClearLogs()
+    {
+        Logs.Clear();
+        return Task.CompletedTask;
+    }
 
-        List<LogEvent>? logs = null;
+    public async Task GenerateSampleError()
+    {
         try
         {
-            logs = JsonConvert.DeserializeObject<List<LogEvent>>(_fileContents);
+            int zero = 0;
+            int result = 5 / zero;
         }
         catch (Exception ex)
         {
-            Debug.WriteLine($"Failed to deserialize log file contents. Exception: {ex.Message}");
+            Logger.Error(ex, "Sample error");
+            await RefreshLogs();
         }
-
-        if (logs == null || logs.Count == 0)
-        {
-            Debug.WriteLine("No logs found in log file");
-        }
-
-        return logs;
     }
 }

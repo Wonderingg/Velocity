@@ -90,14 +90,17 @@ public class WindowsUpdateService : IWindowsUpdateService
 #pragma warning disable CA1416
             dynamic updatesToInstall = Activator.CreateInstance(Type.GetTypeFromProgID("Microsoft.Update.UpdateColl") ?? throw new InvalidOperationException());
 #pragma warning restore CA1416
-            updatesToInstall.Add(update);
-            var installer = _updateSession.CreateUpdateInstaller();
-            installer.Updates = updatesToInstall;
-            var installResult = installer.Install();
-
-            if (installResult.ResultCode != 2)
+            if (updatesToInstall != null)
             {
-                throw new Exception($"Installation failed with result code: {installResult.ResultCode}");
+                updatesToInstall.Add(update);
+                var installer = _updateSession.CreateUpdateInstaller();
+                installer.Updates = updatesToInstall;
+                var installResult = installer.Install();
+
+                if (installResult.ResultCode != 2)
+                {
+                    throw new Exception($"Installation failed with result code: {installResult.ResultCode}");
+                }
             }
         });
     }

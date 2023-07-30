@@ -14,9 +14,9 @@ public class PageService : IPageService
 
     public PageService()
     {
+        Configure<HomeViewModel, HomePage>();
         Configure<TweaksViewModel, TweaksPage>();
         Configure<SettingsViewModel, SettingsPage>();
-        Configure<HomeViewModel, HomePage>();
         Configure<UpdatesViewModel, UpdatesPage>();
         Configure<DebugViewModel, DebugPage>();
     }

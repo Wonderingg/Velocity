@@ -11,26 +11,26 @@ namespace Velocity.ViewModels;
 public partial class UpdatesViewModel : ObservableRecipient, INavigationAware
 {
     private readonly IWindowsUpdateService _windowsUpdateService;
+    private readonly WindowsUpdate _windowsUpdate;
 
     private UpdateDetailViewModel _selected;
 
     public UpdateDetailViewModel Selected
     {
-        get
-        {
-            return _selected;
-        }
+        get => _selected;
         set
         {
-            if (_selected != value)
+            if (_selected == value)
             {
-                _selected = value;
-                OnPropertyChanged(nameof(Selected));
+                return;
             }
+
+            _selected = value;
+            OnPropertyChanged(nameof(Selected));
         }
     }
 
-    public ObservableCollection<UpdateDetailViewModel> AvailableUpdateViewModels { get; } = new ObservableCollection<UpdateDetailViewModel>();
+    public ObservableCollection<UpdateDetailViewModel> AvailableUpdateViewModels { get; } = new();
 
 
     public UpdatesViewModel(IWindowsUpdateService windowsUpdateService)
@@ -51,7 +51,7 @@ public partial class UpdatesViewModel : ObservableRecipient, INavigationAware
 
         foreach (var update in updates)
         {
-            AvailableUpdateViewModels.Add(new UpdateDetailViewModel(_windowsUpdateService) { WindowsUpdate = update });
+            AvailableUpdateViewModels.Add(new UpdateDetailViewModel(_windowsUpdateService, _windowsUpdate) { WindowsUpdate = update });
         }
     }
 

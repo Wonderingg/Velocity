@@ -1,15 +1,14 @@
-﻿using Microsoft.Extensions.Options;
-
+﻿using Windows.Storage;
+using Microsoft.Extensions.Options;
+using NLog;
+using NLog.Config;
+using NLog.Layouts;
+using NLog.Targets;
 using Velocity.Contracts.Services;
 using Velocity.Core.Contracts.Services;
 using Velocity.Core.Helpers;
 using Velocity.Helpers;
 using Velocity.Models;
-
-using Windows.ApplicationModel;
-using Windows.Storage;
-using NLog;
-using NLog.Targets;
 
 namespace Velocity.Services;
 
@@ -22,9 +21,11 @@ public class LocalSettingsService : ILocalSettingsService
     private readonly IFileService _fileService;
     private readonly LocalSettingsOptions _options;
 
-    private readonly string _localApplicationData = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
+    private readonly string _localApplicationData =
+        Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
+
     private readonly string _applicationDataFolder;
-    private readonly string _applicationLogsFolder;
+    private readonly string _applicationLogsFile;
     private readonly string _localsettingsFile;
 
     private IDictionary<string, object> _settings;
@@ -38,7 +39,7 @@ public class LocalSettingsService : ILocalSettingsService
 
         _applicationDataFolder = Path.Combine(_localApplicationData, _options.ApplicationDataFolder ?? DefaultApplicationDataFolder);
         _localsettingsFile = _options.LocalSettingsFile ?? DefaultLocalSettingsFile;
-        _applicationLogsFolder = Path.Combine(_applicationDataFolder, DefaultLogFile);
+        _applicationLogsFile = Path.Combine(_applicationDataFolder, DefaultLogFile);
         _settings = new Dictionary<string, object>();
 
         SetupNLog();
@@ -48,7 +49,10 @@ public class LocalSettingsService : ILocalSettingsService
     {
         if (!_isInitialized)
         {
-            _settings = await Task.Run(() => _fileService.Read<IDictionary<string, object>>(_applicationDataFolder, _localsettingsFile)) ?? new Dictionary<string, object>();
+            _settings = await Task.Run(() =>
+                            _fileService.Read<IDictionary<string, object>>(_applicationDataFolder,
+                                _localsettingsFile)) ??
+                        new Dictionary<string, object>();
 
             _isInitialized = true;
         }
@@ -92,33 +96,32 @@ public class LocalSettingsService : ILocalSettingsService
         }
     }
 
-    private void SetupNLog()
+    public void SetupNLog()
     {
-        var config = new NLog.Config.LoggingConfiguration();
-        var jsonLayout = new NLog.Layouts.JsonLayout()
+        var logFile = GetLogFolderAsync().Result;
+        if (logFile != null && !File.Exists(logFile))
+        {
+            File.Create(logFile);
+        }
+        var config = new LoggingConfiguration();
+        var jsonLayout = new JsonLayout
         {
             Attributes =
             {
-                new NLog.Layouts.JsonAttribute("timeStamp", "${longdate}"),
-                new NLog.Layouts.JsonAttribute("level", "${level}"),
-                new NLog.Layouts.JsonAttribute("logger", "${logger}"),
-                new NLog.Layouts.JsonAttribute("message", "${message}"),
-                new NLog.Layouts.JsonAttribute("exception", "${exception:format=toString,StackTrace}")
+                new JsonAttribute("timeStamp", "${date}"),
+                new JsonAttribute("level", "${level}"),
+                new JsonAttribute("logger", "${logger}"),
+                new JsonAttribute("message", "${message}"),
+                new JsonAttribute("exception", "${exception:format=toString,StackTrace}")
             },
-            IncludeEventProperties = true,
+            IncludeEventProperties = true
         };
-        var logfile = new FileTarget("logfile")
-        {
-            FileName = _applicationLogsFolder,
-            Layout = jsonLayout
-        };
+        var logfile = new FileTarget("logfile") { FileName = logFile, Layout = jsonLayout };
+
 
         config.AddRule(LogLevel.Debug, LogLevel.Fatal, logfile);
         LogManager.Configuration = config;
     }
 
-    public Task<string> GetLogFolderAsync()
-    {
-        return Task.FromResult(_applicationLogsFolder);
-    }
+    public Task<string> GetLogFolderAsync() => Task.FromResult(_applicationLogsFile);
 }
